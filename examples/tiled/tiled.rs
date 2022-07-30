@@ -173,20 +173,6 @@ pub fn process_loaded_tile_maps(
                         //let tile_spacing = Vec2::new(tileset.margin as f32, tileset.margin as f32);
                         let tile_spacing = Vec2::new(1.0, 1.0);
 
-                        //panic!("Addio!");
-
-                        /*let mut map_settings = LayerSettings::new(
-                            MapSize(
-                                (tiled_map.map.width as f32 / 64.0).ceil() as u32,
-                                (tiled_map.map.height as f32 / 64.0).ceil() as u32,
-                            ),
-                            ChunkSize(64, 64),
-                            TileSize(tile_width, tile_height),
-                            TextureSize(
-                                tileset.image.as_ref().unwrap().width as f32,
-                                tileset.image.as_ref().unwrap().height as f32,
-                            ),
-                        );*/
                         let mut map_settings = LayerSettings::new(
                             MapSize(rows, cols),
                             ChunkSize(tile_width as u32 * 2, tile_height as u32 * 2),
