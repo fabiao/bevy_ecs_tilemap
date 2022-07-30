@@ -1,3 +1,3 @@
-pub mod camera;
+pub mod parallax_camera;
 pub mod movement;
 pub mod texture;

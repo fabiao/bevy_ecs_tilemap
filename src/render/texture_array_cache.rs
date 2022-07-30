@@ -150,9 +150,13 @@ impl TextureArrayCache {
                 });
 
             for i in 0..count {
-                let columns = (atlas_size.0 as f32 + spacing.x) / (tile_size.0 + spacing.x);
+                let columns = atlas_size.0 / (tile_size.0 + spacing.x);
                 let sprite_sheet_x: f32 = (i as f32 % columns).floor() * (tile_size.0 + spacing.x);
                 let sprite_sheet_y: f32 = (i as f32 / columns).floor() * (tile_size.1 + spacing.y);
+
+                if sprite_sheet_x >= atlas_size.0 || sprite_sheet_y >= atlas_size.1 {
+                    continue;
+                }
 
                 command_encoder.copy_texture_to_texture(
                     ImageCopyTexture {

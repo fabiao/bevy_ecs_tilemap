@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use std::{collections::HashMap, io::BufReader};
 
+use crate::helpers::parallax_camera::ParallaxSpeed;
 use bevy::asset::{AssetLoader, AssetPath, BoxedFuture, LoadContext, LoadedAsset};
 use bevy::reflect::TypeUuid;
 
@@ -30,6 +31,12 @@ pub struct TiledMapBundle {
     pub map: Map,
     pub transform: Transform,
     pub global_transform: GlobalTransform,
+}
+
+impl ParallaxSpeed {
+    pub fn new(x: f32, y: f32) -> Self {
+        Self { x, y }
+    }
 }
 
 pub struct TiledLoader;
@@ -154,12 +161,21 @@ pub fn process_loaded_tile_maps(
                         let tile_width = tileset.tile_width as f32;
                         let tile_height = tileset.tile_height as f32;
 
-                        let _tile_space = tileset.spacing as f32; // TODO: re-add tile spacing.. :p
-
+                        let cols = tileset.columns;
+                        let rows = tileset.tilecount / cols;
                         let offset_x = layer.offset_x;
                         let offset_y = layer.offset_y;
+                        let parallax_x = layer.parallax_x;
+                        let parallax_y = layer.parallax_y;
 
-                        let mut map_settings = LayerSettings::new(
+                        let image = tileset.image.as_ref().unwrap();
+
+                        //let tile_spacing = Vec2::new(tileset.margin as f32, tileset.margin as f32);
+                        let tile_spacing = Vec2::new(1.0, 1.0);
+
+                        //panic!("Addio!");
+
+                        /*let mut map_settings = LayerSettings::new(
                             MapSize(
                                 (tiled_map.map.width as f32 / 64.0).ceil() as u32,
                                 (tiled_map.map.height as f32 / 64.0).ceil() as u32,
@@ -170,7 +186,15 @@ pub fn process_loaded_tile_maps(
                                 tileset.image.as_ref().unwrap().width as f32,
                                 tileset.image.as_ref().unwrap().height as f32,
                             ),
+                        );*/
+                        let mut map_settings = LayerSettings::new(
+                            MapSize(rows, cols),
+                            ChunkSize(tile_width as u32 * 2, tile_height as u32 * 2),
+                            TileSize(tile_width, tile_height),
+                            TextureSize(image.width as f32, image.height as f32),
                         );
+
+                        map_settings.tile_spacing = tile_spacing;
                         map_settings.grid_size = Vec2::new(
                             tiled_map.map.tile_width as f32,
                             tiled_map.map.tile_height as f32,
@@ -193,11 +217,7 @@ pub fn process_loaded_tile_maps(
                             &mut commands,
                             map_settings.clone(),
                             &mut meshes,
-                            tiled_map
-                                .tilesets
-                                .get(&tileset_index)
-                                .unwrap()
-                                .clone_weak(),
+                            tiled_map.tilesets.get(&tileset_index).unwrap().clone_weak(),
                             0u16,
                             layer_index as u16,
                             move |mut tile_pos| {
@@ -234,16 +254,29 @@ pub fn process_loaded_tile_maps(
                                             })
                                         })
                                     }
-                                    _ => panic!("Unsupported layer type"),
+                                    tiled::LayerType::ObjectLayer(object_layer) => {
+                                        println!(
+                                            "Found object layer with {:?} objects",
+                                            object_layer.objects().count()
+                                        );
+                                        for o in object_layer.objects() {
+                                            println!(
+                                                "Found object {:?} with shape {:?}",
+                                                o.name, o.shape
+                                            );
+                                        }
+                                        //panic!("Sayonara")
+                                        None
+                                    }
+                                    _ => panic!("Unsupported layer type {:?}", layer.layer_type()),
                                 }
                             },
                         );
 
-                        commands.entity(layer_entity).insert(Transform::from_xyz(
-                            offset_x,
-                            -offset_y,
-                            layer_index as f32,
-                        ));
+                        commands
+                            .entity(layer_entity)
+                            .insert(Transform::from_xyz(offset_x, -offset_y, layer_index as f32))
+                            .insert(ParallaxSpeed::new(parallax_x, parallax_y));
                         map.add_layer(&mut commands, layer_index as u16, layer_entity);
                     }
                 }
