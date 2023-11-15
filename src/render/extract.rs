@@ -1,3 +1,4 @@
+use bevy::math::Affine3A;
 use bevy::prelude::Res;
 use bevy::prelude::Time;
 use bevy::render::primitives::{Aabb, Frustum};
@@ -65,7 +66,7 @@ pub struct ExtractedTilemapBundle {
     map_type: TilemapType,
     texture: TilemapTexture,
     map_size: TilemapSize,
-    visibility: ComputedVisibility,
+    visibility: InheritedVisibility,
     frustum_culling: FrustumCulling,
 }
 
@@ -79,6 +80,21 @@ pub(crate) struct ExtractedTilemapTexture {
     pub texture: TilemapTexture,
     pub filtering: FilterMode,
     pub format: TextureFormat,
+}
+
+impl From<&TilemapTileSize> for UVec2 {
+    fn from(tile_size: &TilemapTileSize) -> Self {
+        UVec2::new(tile_size.x as u32, tile_size.y as u32)
+    }
+}
+
+impl From<UVec2> for TilemapTileSize {
+    fn from(v: UVec2) -> Self {
+        TilemapTileSize {
+            x: v.x as f32,
+            y: v.y as f32,
+        }
+    }
 }
 
 impl ExtractedTilemapTexture {
@@ -96,12 +112,13 @@ impl ExtractedTilemapTexture {
                     "Expected image to have finished loading if \
                     it is being extracted as a texture!",
                 );
-                let texture_size: TilemapTextureSize = image.size().into();
+                let image_size = image.size();
+                let texture_size = Vec2::new(image_size.x as f32, image_size.y as f32);
                 let tile_count_x = ((texture_size.x) / (tile_size.x + tile_spacing.x)).floor();
                 let tile_count_y = ((texture_size.y) / (tile_size.y + tile_spacing.y)).floor();
                 (
                     (tile_count_x * tile_count_y) as u32,
-                    texture_size,
+                    image_size.into(),
                     image.texture_descriptor.format,
                 )
             }
@@ -133,7 +150,7 @@ impl ExtractedTilemapTexture {
                     }
                 }
 
-                (handles.len() as u32, tile_size.into(), first_format)
+                (handles.len() as u32, tile_size, first_format)
             }
             #[cfg(not(feature = "atlas"))]
             TilemapTexture::TextureContainer(image_handle) => {
@@ -144,7 +161,7 @@ impl ExtractedTilemapTexture {
                 let tile_size: TilemapTileSize = image.size().into();
                 (
                     image.texture_descriptor.array_layer_count(),
-                    tile_size.into(),
+                    tile_size,
                     image.texture_descriptor.format,
                 )
             }
@@ -157,7 +174,7 @@ impl ExtractedTilemapTexture {
             tile_spacing,
             filtering,
             tile_count,
-            texture_size,
+            texture_size: texture_size.into(),
             format,
         }
     }
@@ -174,9 +191,9 @@ pub struct ExtractedFrustum {
 }
 
 impl ExtractedFrustum {
-    pub fn intersects_obb(&self, aabb: &Aabb, transform_matrix: &Mat4) -> bool {
+    pub fn intersects_obb(&self, aabb: &Aabb, affine: &Affine3A) -> bool {
         self.frustum
-            .intersects_obb(aabb, transform_matrix, true, false)
+            .intersects_obb(aabb, affine, true, false)
     }
 }
 
@@ -216,7 +233,7 @@ pub fn extract(
             &TilemapType,
             &TilemapTexture,
             &TilemapSize,
-            &ComputedVisibility,
+            &InheritedVisibility,
             &FrustumCulling,
         )>,
     >,
@@ -232,7 +249,7 @@ pub fn extract(
                 Changed<TilemapSpacing>,
                 Changed<TilemapGridSize>,
                 Changed<TilemapSize>,
-                Changed<ComputedVisibility>,
+                Changed<InheritedVisibility>,
                 Changed<FrustumCulling>,
             )>,
         >,

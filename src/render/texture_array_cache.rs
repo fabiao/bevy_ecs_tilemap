@@ -75,7 +75,8 @@ impl TextureArrayCache {
                     "Expected image to have finished loading if \
                     it is being extracted as a texture!",
                 );
-                let texture_size: TilemapTextureSize = image.size().into();
+                let image_size = image.size();
+                let texture_size = TilemapTextureSize { x: image_size.x as f32, y: image_size.y as f32 };
                 let tile_count_x = ((texture_size.x) / (tile_size.x + tile_spacing.x)).floor();
                 let tile_count_y = ((texture_size.y) / (tile_size.y + tile_spacing.y)).floor();
                 ((tile_count_x * tile_count_y) as u32, texture_size)
