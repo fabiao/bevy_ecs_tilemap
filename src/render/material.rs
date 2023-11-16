@@ -8,7 +8,7 @@ use bevy::{
         render_asset::RenderAssets,
         render_phase::{AddRenderCommand, DrawFunctions, RenderPhase},
         render_resource::{
-            AsBindGroup, AsBindGroupError, BindGroup, BindGroupDescriptor, BindGroupEntry,
+            AsBindGroup, AsBindGroupError, BindGroup, BindGroupEntry,
             BindGroupLayout, BindingResource, OwnedBindingResource, PipelineCache,
             RenderPipelineDescriptor, ShaderRef, SpecializedRenderPipeline,
             SpecializedRenderPipelines,
@@ -260,7 +260,7 @@ fn extract_materials_tilemap<M: MaterialTilemap>(
                 changed_assets.remove(&id);
                 removed.push(*id);
             }
-            AssetEvent::LoadedWithDependencies { id } => {}
+            AssetEvent::LoadedWithDependencies { id: _ } => {}
         }
     }
 

@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
 use bevy::{
-    asset::load_internal_asset,
+    asset::embedded_asset,
     core_pipeline::core_2d::Transparent2d,
     prelude::*,
     render::{
@@ -27,9 +27,7 @@ use crate::{
 };
 
 use self::{
-    chunk::RenderChunk2dStorage,
-    draw::DrawTilemap,
-    pipeline::{TilemapPipeline, TILEMAP_SHADER_FRAGMENT, TILEMAP_SHADER_VERTEX},
+    chunk::RenderChunk2dStorage, draw::DrawTilemap, pipeline::TilemapPipeline,
     queue::ImageBindGroups,
 };
 
@@ -98,19 +96,6 @@ pub struct TilemapRenderingPlugin;
 #[derive(Resource, Default, Deref, DerefMut)]
 pub struct SecondsSinceStartup(pub f32);
 
-pub const COLUMN_EVEN_HEX: Handle<Shader> = Handle::weak_from_u128(7704924705970804993);
-pub const COLUMN_HEX: Handle<Shader> = Handle::weak_from_u128(11710877199891728627);
-pub const COLUMN_ODD_HEX: Handle<Shader> = Handle::weak_from_u128(6706359414982022142);
-pub const COMMON: Handle<Shader> = Handle::weak_from_u128(15420881977837458322);
-pub const DIAMOND_ISO: Handle<Shader> = Handle::weak_from_u128(6710251300621614118);
-pub const MESH_OUTPUT: Handle<Shader> = Handle::weak_from_u128(2707251459590872179);
-pub const ROW_EVEN_HEX: Handle<Shader> = Handle::weak_from_u128(7149718726759672633);
-pub const ROW_HEX: Handle<Shader> = Handle::weak_from_u128(5506589682629967569);
-pub const ROW_ODD_HEX: Handle<Shader> = Handle::weak_from_u128(13608302855194400936);
-pub const STAGGERED_ISO: Handle<Shader> = Handle::weak_from_u128(9802843761568314416);
-pub const SQUARE: Handle<Shader> = Handle::weak_from_u128(7333720254399106799);
-pub const TILEMAP_VERTEX_OUTPUT: Handle<Shader> = Handle::weak_from_u128(6104533649830094529);
-
 impl Plugin for TilemapRenderingPlugin {
     fn build(&self, app: &mut App) {
         #[cfg(not(feature = "atlas"))]
@@ -145,90 +130,31 @@ impl Plugin for TilemapRenderingPlugin {
         );
         let sampler = image_sampler.as_wgpu();*/
 
-        load_internal_asset!(
-            app,
-            COLUMN_EVEN_HEX,
-            "shaders/column_even_hex.wgsl",
-            Shader::from_wgsl
-        );
+        embedded_asset!(app, "shaders/column_even_hex.wgsl");
 
-        load_internal_asset!(
-            app,
-            COLUMN_HEX,
-            "shaders/column_hex.wgsl",
-            Shader::from_wgsl
-        );
+        embedded_asset!(app, "shaders/column_odd_hex.wgsl");
 
-        load_internal_asset!(
-            app,
-            COLUMN_ODD_HEX,
-            "shaders/column_odd_hex.wgsl",
-            Shader::from_wgsl
-        );
+        embedded_asset!(app, "shaders/common.wgsl");
 
-        load_internal_asset!(app, COMMON, "shaders/common.wgsl", Shader::from_wgsl);
+        embedded_asset!(app, "shaders/diamond_iso.wgsl");
 
-        load_internal_asset!(
-            app,
-            DIAMOND_ISO,
-            "shaders/diamond_iso.wgsl",
-            Shader::from_wgsl
-        );
+        embedded_asset!(app, "shaders/row_even_hex.wgsl");
 
-        load_internal_asset!(
-            app,
-            ROW_EVEN_HEX,
-            "shaders/row_even_hex.wgsl",
-            Shader::from_wgsl
-        );
+        embedded_asset!(app, "shaders/row_hex.wgsl");
 
-        load_internal_asset!(app, ROW_HEX, "shaders/row_hex.wgsl", Shader::from_wgsl);
+        embedded_asset!(app, "shaders/row_odd_hex.wgsl");
 
-        load_internal_asset!(
-            app,
-            ROW_ODD_HEX,
-            "shaders/row_odd_hex.wgsl",
-            Shader::from_wgsl
-        );
+        embedded_asset!(app, "shaders/mesh_output.wgsl");
 
-        load_internal_asset!(app, ROW_HEX, "shaders/row_hex.wgsl", Shader::from_wgsl);
+        embedded_asset!(app, "shaders/square.wgsl");
 
-        load_internal_asset!(
-            app,
-            MESH_OUTPUT,
-            "shaders/mesh_output.wgsl",
-            Shader::from_wgsl
-        );
+        embedded_asset!(app, "shaders/staggered_iso.wgsl");
 
-        load_internal_asset!(app, SQUARE, "shaders/square.wgsl", Shader::from_wgsl);
+        embedded_asset!(app, "shaders/tilemap_vertex_output.wgsl");
 
-        load_internal_asset!(
-            app,
-            STAGGERED_ISO,
-            "shaders/staggered_iso.wgsl",
-            Shader::from_wgsl
-        );
+        embedded_asset!(app, "shaders/tilemap_vertex.wgsl");
 
-        load_internal_asset!(
-            app,
-            TILEMAP_VERTEX_OUTPUT,
-            "shaders/tilemap_vertex_output.wgsl",
-            Shader::from_wgsl
-        );
-
-        load_internal_asset!(
-            app,
-            TILEMAP_SHADER_VERTEX,
-            "shaders/tilemap_vertex.wgsl",
-            Shader::from_wgsl
-        );
-
-        load_internal_asset!(
-            app,
-            TILEMAP_SHADER_FRAGMENT,
-            "shaders/tilemap_fragment.wgsl",
-            Shader::from_wgsl
-        );
+        embedded_asset!(app, "shaders/tilemap_fragment.wgsl");
 
         let render_app = match app.get_sub_app_mut(RenderApp) {
             Ok(render_app) => render_app,
