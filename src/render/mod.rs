@@ -108,6 +108,7 @@ impl Plugin for TilemapRenderingPlugin {
 
         app.world
             .resource_mut::<Assets<StandardTilemapMaterial>>()
+            .insert(AssetId::default(), StandardTilemapMaterial::default())
             /*.set_untracked(
                 Handle::<StandardTilemapMaterial>::default(),
                 StandardTilemapMaterial::default(),
