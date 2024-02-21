@@ -3,7 +3,7 @@ use bevy::{
     render::{
         globals::GlobalsUniform,
         render_resource::{
-            BindGroupLayout, BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingType,
+            BindGroupLayout, BindGroupLayoutEntry, BindingType,
             BlendComponent, BlendFactor, BlendOperation, BlendState, BufferBindingType,
             ColorTargetState, ColorWrites, Face, FragmentState, FrontFace, MultisampleState,
             PolygonMode, PrimitiveState, PrimitiveTopology, RenderPipelineDescriptor,
@@ -36,8 +36,9 @@ impl FromWorld for TilemapPipeline {
         let world = world.cell();
         let render_device = world.get_resource::<RenderDevice>().unwrap();
 
-        let view_layout = render_device.create_bind_group_layout(&BindGroupLayoutDescriptor {
-            entries: &[
+        let view_layout = render_device.create_bind_group_layout(
+            Some("tilemap_view_layout"),
+            &[
                 // View
                 BindGroupLayoutEntry {
                     binding: 0,
@@ -60,11 +61,11 @@ impl FromWorld for TilemapPipeline {
                     count: None,
                 },
             ],
-            label: Some("tilemap_view_layout"),
-        });
+        );
 
-        let mesh_layout = render_device.create_bind_group_layout(&BindGroupLayoutDescriptor {
-            entries: &[
+        let mesh_layout = render_device.create_bind_group_layout(
+            Some("tilemap_mesh_layout"),
+            &[
                 BindGroupLayoutEntry {
                     binding: 0,
                     visibility: ShaderStages::VERTEX | ShaderStages::FRAGMENT,
@@ -88,12 +89,12 @@ impl FromWorld for TilemapPipeline {
                     count: None,
                 },
             ],
-            label: Some("tilemap_mesh_layout"),
-        });
+        );
 
         #[cfg(not(feature = "atlas"))]
-        let material_layout = render_device.create_bind_group_layout(&BindGroupLayoutDescriptor {
-            entries: &[
+        let material_layout = render_device.create_bind_group_layout(
+            Some("tilemap_material_layout"),
+            &[
                 BindGroupLayoutEntry {
                     binding: 0,
                     visibility: ShaderStages::FRAGMENT,
@@ -111,8 +112,7 @@ impl FromWorld for TilemapPipeline {
                     count: None,
                 },
             ],
-            label: Some("tilemap_material_layout"),
-        });
+        );
 
         #[cfg(feature = "atlas")]
         let material_layout = render_device.create_bind_group_layout(&BindGroupLayoutDescriptor {
